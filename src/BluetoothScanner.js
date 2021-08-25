@@ -55,6 +55,12 @@ const BluetoothScanner = () => {
           title="Turn On Bluetooth"
           onPress={async () => {
             const btState = await manager.state()
+            // test is bluetooth is supported
+            if (btState==="Unsupported") {
+              alert("Bluetooth is not supported");
+              return (false);
+            }
+            // enable if it is not powered on
             if (btState!=="PoweredOn") {
               await manager.enable();
             } else {
@@ -76,15 +82,22 @@ const BluetoothScanner = () => {
         <Button
           title="Scan Devices"
           onPress={async () => {
+            const btState = await manager.state()
+            // test if bluetooth is powered on
+            if (btState!=="PoweredOn") {
+              alert("Bluetooth is not powered on");
+              return (false);
+            }
+            // explicitly ask for user's permission
             const permission = await requestPermission();
             if (permission) {
               manager.startDeviceScan(null, null, async (error, device) => {
+                  // error handling
                   if (error) {
                     console.log(error);
-                      // Handle error (scanning will be stopped automatically)
-                      return
+                    return
                   }
-
+                  // found a bluetooth device
                   if (device) {
                     console.log(`${device.name} (${device.id})}`);
                     const newScannedDevices = scannedDevices;
